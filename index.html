@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event ICS Generator</title>
+</head>
+<body>
+
+<script type="text/javascript">
+    window.onload = function() {
+        downloadICS();
+    };
+
+    function downloadICS() {
+        // Get the current date
+        const today = new Date();
+        
+        // Calculate the event date (6 months from today)
+        const eventDate = new Date(today.setMonth(today.getMonth() + 6));
+		eventDate.setHours(12, 0, 0, 0);  // Set time to 12 PM
+        const eventStartDate = formatDate(eventDate);
+        const eventEndDate = formatDate(new Date(eventDate.getTime() + 4 * 60 * 60 * 1000));  // Assuming 4 hour event
+
+        // Format dates to: YYYYMMDDTHHmmss
+        function formatDate(date) {
+            const pad = num => (num < 10 ? '0' : '') + num;
+            return date.getFullYear() +
+                   pad(date.getMonth() + 1) +
+                   pad(date.getDate()) +
+                   'T' +
+                   pad(date.getHours()) +
+                   pad(date.getMinutes()) +
+                   pad(date.getSeconds());
+        }
+
+        // Create ICS content
+        const icsContent = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'BEGIN:VEVENT',
+            `SUMMARY:Friendly Reminder to bring in your device at your local Geek Squad for a Tune-Up`,
+            `DTSTART:${eventStartDate}`,
+            `DTEND:${eventEndDate}`,
+            'STATUS:CONFIRMED',
+            'SEQUENCE:3',
+            'BEGIN:VALARM',
+            'TRIGGER:-PT10M',
+            'DESCRIPTION:Computer Tune-Up Remindedr',
+            'ACTION:DISPLAY',
+            'END:VALARM',
+            'END:VEVENT',
+            'END:VCALENDAR'
+        ].join('\n');
+
+        // Create a Blob from the ICS content
+        const blob = new Blob([icsContent], { type: 'text/calendar' });
+        
+        // Create a link element
+        const link = document.createElement('a');
+        
+        // Set the download attribute with a filename
+        link.download = 'event.ics';
+        
+        // Create a URL for the Blob and set it as the href attribute
+        link.href = window.URL.createObjectURL(blob);
+        
+        // Append the link to the body
+        document.body.appendChild(link);
+        
+        // Programmatically click the link to trigger the download
+        link.click();
+        
+        // Remove the link from the document
+        document.body.removeChild(link);
+    }
+</script>
+
+</body>
+</html>
